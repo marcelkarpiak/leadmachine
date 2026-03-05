@@ -1,0 +1,330 @@
+# 🎨 Design Guidelines – IvoryLab Lead Machine
+### Inspired by InsightHub KPI Dashboard
+
+---
+
+## 1. FILOZOFIA DESIGNU
+
+**Kierunek:** Refined Minimalism – Corporate Clarity  
+**Charakter:** Profesjonalny, przejrzysty, spokojny. Interfejs który nie krzyczy – mówi.  
+**Zasada nadrzędna:** Każdy element na ekranie musi zarabiać swoje miejsce. Jeśli można go usunąć bez utraty kontekstu – usuń go.
+
+> "White space is not empty space. It is breathing room."
+
+---
+
+## 2. COLOR PALETTE
+
+### Kolory bazowe (neutralne)
+```
+--color-bg-base:        #EEF0F5   /* tło aplikacji – chłodna szarość */
+--color-bg-surface:     #FFFFFF   /* karty, panele, sidebar */
+--color-bg-surface-2:   #F7F8FA   /* zagnieżdżone sekcje, hover rows */
+--color-border:         #E8EAEE   /* obramowania, dividers */
+--color-border-light:   #F0F2F5   /* bardzo subtelne linie */
+```
+
+### Kolory tekstu
+```
+--color-text-primary:   #0F1117   /* nagłówki, kluczowe dane */
+--color-text-secondary: #6B7280   /* opisy, labele, podpisy */
+--color-text-tertiary:  #9CA3AF   /* placeholder, disabled */
+--color-text-inverse:   #FFFFFF   /* tekst na ciemnych tłach */
+```
+
+### Kolor akcentowy (niebieski – primary action)
+```
+--color-accent:         #2563EB   /* primary button, active nav, links */
+--color-accent-hover:   #1D4ED8   /* hover state */
+--color-accent-light:   #EFF6FF   /* accent background subtle */
+--color-accent-muted:   #BFDBFE   /* badges, soft highlights */
+```
+
+### Kolory statusów
+```
+--color-success:        #10B981   /* Project Done, aktywny, pozytywny */
+--color-success-light:  #ECFDF5
+--color-warning:        #F59E0B   /* On Hold, ostrzeżenie */
+--color-warning-light:  #FFFBEB
+--color-danger:         #EF4444   /* błąd, krytyczny alert */
+--color-danger-light:   #FEF2F2
+--color-info:           #3B82F6   /* informacja, In Progress */
+--color-info-light:     #EFF6FF
+```
+
+### Score leadów
+```
+--color-hot:            #10B981   /* 🟢 Hot (70–100 pkt) */
+--color-warm:           #F59E0B   /* 🟡 Warm (40–69 pkt) */
+--color-cold:           #9CA3AF   /* 🔴 Cold (0–39 pkt) */
+```
+
+---
+
+## 3. GRADIENTY
+
+Używaj gradientów **bardzo oszczędnie** – tylko jako akcent, nigdy jako tło całej strony.
+
+```css
+/* Gradient przycisku primary (aktywny sidebar item) */
+--gradient-accent: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+
+/* Gradient karty statystyki (subtle) */
+--gradient-card-subtle: linear-gradient(145deg, #FFFFFF 0%, #F7F8FA 100%);
+
+/* Gradient wykresu słupkowego – aktywny słupek */
+--gradient-bar-active: linear-gradient(180deg, #3B82F6 0%, #2563EB 100%);
+
+/* Gradient wykresu słupkowego – nieaktywny */
+--gradient-bar-inactive: linear-gradient(180deg, #DBEAFE 0%, #C7D2FE 100%);
+
+/* Gradient avatar placeholder */
+--gradient-avatar: linear-gradient(135deg, #1F2937 0%, #374151 100%);
+```
+
+**Zasada:** Gradient pojawia się tylko w:
+- Aktywnym elemencie nawigacji (sidebar button)
+- Słupkach wykresu
+- Avatarach bez zdjęcia
+- Przyciskach CTA (primary)
+
+---
+
+## 4. TYPOGRAFIA
+
+### Font Stack
+```css
+/* Display / Nagłówki */
+font-family: 'DM Sans', 'Plus Jakarta Sans', sans-serif;
+
+/* Body / UI */
+font-family: 'Inter', 'DM Sans', sans-serif;
+
+/* Dane liczbowe / KPI */
+font-family: 'DM Mono', 'JetBrains Mono', monospace;
+```
+
+> Importuj z Google Fonts:
+> `DM Sans` (400, 500, 600, 700) + `DM Mono` (400, 500)
+
+### Skala typograficzna
+```
+/* Headings */
+--text-h1:    28px / line-height: 1.2 / weight: 700   /* Tytuł strony */
+--text-h2:    22px / line-height: 1.3 / weight: 600   /* Sekcja */
+--text-h3:    18px / line-height: 1.4 / weight: 600   /* Karta, panel */
+--text-h4:    15px / line-height: 1.4 / weight: 600   /* Subsekcja */
+
+/* Body */
+--text-body:     14px / line-height: 1.6 / weight: 400   /* Główny tekst */
+--text-body-sm:  13px / line-height: 1.5 / weight: 400   /* Opisy, meta */
+--text-caption:  12px / line-height: 1.4 / weight: 400   /* Labele, podpisy */
+
+/* KPI Numbers */
+--text-kpi-xl:   32px / line-height: 1.0 / weight: 700 / font: DM Mono
+--text-kpi-lg:   24px / line-height: 1.1 / weight: 600 / font: DM Mono
+
+/* UI Elements */
+--text-label:    12px / line-height: 1.0 / weight: 500 / letter-spacing: 0.5px / uppercase
+--text-button:   14px / line-height: 1.0 / weight: 500
+--text-nav:      14px / line-height: 1.0 / weight: 500
+```
+
+---
+
+## 5. SPACING & LAYOUT
+
+```
+/* Base unit: 4px */
+--space-1:   4px
+--space-2:   8px
+--space-3:   12px
+--space-4:   16px
+--space-5:   20px
+--space-6:   24px
+--space-8:   32px
+--space-10:  40px
+--space-12:  48px
+
+/* Layout */
+--sidebar-width:     220px
+--topbar-height:     64px
+--content-padding:   24px
+--card-padding:      20px
+--card-padding-sm:   16px
+```
+
+---
+
+## 6. BORDER RADIUS
+
+```
+--radius-sm:    8px    /* inputy, tagi, badges */
+--radius-md:    12px   /* karty, panele */
+--radius-lg:    16px   /* główne sekcje */
+--radius-xl:    20px   /* modalne, sidebar (outer) */
+--radius-full:  9999px /* przyciski pill, avatary */
+```
+
+---
+
+## 7. SHADOWS
+
+```css
+/* Karty – podstawowy cień */
+--shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+
+/* Karty – hover */
+--shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+
+/* Dropdown, popover */
+--shadow-popover: 0 8px 24px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+
+/* Modal */
+--shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
+
+/* Przycisk primary */
+--shadow-button: 0 4px 12px rgba(37, 99, 235, 0.30);
+```
+
+**Zasada:** Cienie są zawsze **bardzo subtelne**. Nigdy czarny cień – zawsze z opacity max 0.12 dla neutralnych i 0.30 dla kolorowych.
+
+---
+
+## 8. KOMPONENTY UI
+
+### Sidebar
+- Tło: `--color-bg-surface` (#FFFFFF)
+- Szerokość: 220px, padding: 16px
+- Logo: 36px circle, czarne tło z białą ikoną
+- Nav item (nieaktywny): tekst `--color-text-secondary`, ikona 18px
+- Nav item (aktywny): `--gradient-accent`, tekst biały, border-radius: `--radius-full`
+- Nav sub-item: indent 24px, dot indicator (kolorowy) + tekst 13px
+
+### Karty KPI (statystyki)
+- Tło: `--color-bg-surface`, border: 1px `--color-border`
+- Border-radius: `--radius-md`
+- Ikona: 36px circle, border: 1.5px `--color-border`
+- Liczba: `--text-kpi-xl`, kolor `--color-text-primary`
+- Label: `--text-caption`, kolor `--color-text-secondary`
+- Ikona expand (góra prawo): 16px, `--color-text-tertiary`
+
+### Tabela / Lista projektów
+- Row background: transparent
+- Row hover: `--color-bg-surface-2`
+- Separator: 1px `--color-border-light`
+- Avatar grupy: overlap -8px, ring: 2px white
+- Status badge: pill, 12px font, odpowiedni `--color-*-light` background
+
+### Przyciski
+```
+Primary:   bg: --gradient-accent, text: white, shadow: --shadow-button
+Secondary: bg: --color-bg-surface-2, border: --color-border, text: --color-text-primary
+Ghost:     bg: transparent, hover: --color-bg-surface-2
+Danger:    bg: --color-danger-light, text: --color-danger
+```
+
+### Alert / Notification banner
+- Tło: `--color-bg-surface`
+- Ikona: 44px circle, czarne tło z białą ikoną dzwonka
+- Tekst z highlighted name: kolor `--color-danger`
+- CTA button (View Detail): `--gradient-accent`
+
+### Wykres słupkowy
+- Aktywny słupek: `--gradient-bar-active`
+- Nieaktywne: `--gradient-bar-inactive`
+- Tooltip: ciemny (#1F2937), border-radius `--radius-sm`
+- Oś X: `--text-caption`, `--color-text-tertiary`
+
+### Top Performance karty
+- Tło: `--color-bg-surface-2`
+- Zdjęcie: pełna szerokość karty, brak border-radius na górze
+- Rank: bold, 16px, `--color-text-primary`
+- Imię: 13px, `--color-text-secondary`
+
+---
+
+## 9. IKONOGRAFIA
+
+- **Biblioteka:** Lucide Icons (spójne, minimalistyczne, stroke-based)
+- **Rozmiar standardowy:** 18px (nav), 16px (inline), 20px (standalone)
+- **Stroke width:** 1.5px
+- **Kolor:** dziedziczy z kontekstu (`currentColor`)
+
+---
+
+## 10. ZASADY MINIMALIZMU (obowiązkowe)
+
+1. **Brak dekoracji bez funkcji** – żaden element nie istnieje tylko dla ozdoby
+2. **Max 2 font-weight na widok** – nie mieszaj 400/500/600/700 wszystkich razem
+3. **Jeden kolor akcentowy** – niebieski (#2563EB) jest jedynym "głośnym" kolorem
+4. **Obramowania zamiast cieni gdzie możliwe** – 1px border jest czystszy niż box-shadow
+5. **Białe tło kart na szarym tle aplikacji** – klasyczna głębia bez efektów
+6. **Tekst albo ikona – nie oba** – jeśli ikona jest oczywista, nie potrzebujesz labelu
+7. **Animacje max 200ms** – hover transitions: `all 0.15s ease`, żadnych bounce/spring na UI elementach
+8. **Consistent 8px grid** – wszystkie odstępy są wielokrotnością 8px
+
+---
+
+## 11. CZEGO UNIKAĆ
+
+❌ Gradient mesh backgrounds na całej stronie  
+❌ Glassmorphism / blur effects  
+❌ Ciemny motyw (aplikacja jest zawsze light)  
+❌ Rounded corners > 20px (wygląda zabawkowo)  
+❌ Więcej niż 3 kolory w jednym widoku  
+❌ Font Inter w nagłówkach (zbyt generyczny)  
+❌ Box shadow z opacity > 0.15 (zbyt ciężkie)  
+❌ Animacje dłuższe niż 300ms  
+❌ Ikony wypełnione (solid) – używaj tylko stroke  
+
+---
+
+## 12. QUICK REFERENCE – CSS VARIABLES
+
+```css
+:root {
+  /* Colors */
+  --bg-base: #EEF0F5;
+  --bg-surface: #FFFFFF;
+  --bg-surface-2: #F7F8FA;
+  --border: #E8EAEE;
+  --text-primary: #0F1117;
+  --text-secondary: #6B7280;
+  --text-tertiary: #9CA3AF;
+  --accent: #2563EB;
+  --accent-hover: #1D4ED8;
+  --accent-light: #EFF6FF;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+
+  /* Typography */
+  --font-display: 'DM Sans', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+
+  /* Spacing */
+  --space-base: 4px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,.08);
+  --shadow-button: 0 4px 12px rgba(37,99,235,.30);
+
+  /* Gradients */
+  --gradient-accent: linear-gradient(135deg, #2563EB, #1E40AF);
+  --gradient-bar: linear-gradient(180deg, #3B82F6, #2563EB);
+  --gradient-bar-muted: linear-gradient(180deg, #DBEAFE, #C7D2FE);
+}
+```
+
+---
+
+*Design Guidelines v1.0 | IvoryLab Lead Machine | Styl: Refined Minimalism – Corporate Clarity*

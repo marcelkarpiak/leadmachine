@@ -1,0 +1,3 @@
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS headline text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS about text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS photo_url text;
