@@ -73,17 +73,38 @@ export default function ScrapingPage() {
             }
 
             // 5. Invoke Edge Functions — A.N.T. chain
-            // Helper to call edge functions with error handling using Supabase Client
+            const { data: { session } } = await supabase.auth.getSession();
+            const accessToken = session?.access_token;
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+            const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+            const bearer = accessToken || anonKey;
+
+            const edgeFetchHeaders = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${bearer}`,
+                'apikey': anonKey,
+            };
+
+            // Helper to call edge functions with error handling
             const callEdgeFunction = async (name: string, body: Record<string, unknown>) => {
-                const { data, error } = await supabase.functions.invoke(name, {
-                    body: body,
+                const res = await fetch(`${supabaseUrl}/functions/v1/${name}`, {
+                    method: 'POST',
+                    headers: edgeFetchHeaders,
+                    body: JSON.stringify(body),
                 });
 
-                if (error) {
-                    throw new Error(`Edge Function ${name} failed: ${error.message}`);
+                if (!res.ok) {
+                    let detail = `Edge Function ${name} HTTP ${res.status}`;
+                    try {
+                        const b = await res.json();
+                        detail = b.error || b.message || detail;
+                    } catch {
+                        try { const t = await res.text(); if (t) detail = t; } catch { /* keep default */ }
+                    }
+                    throw new Error(detail);
                 }
 
-                return data;
+                return res.json();
             };
 
             // A — Acquisition
