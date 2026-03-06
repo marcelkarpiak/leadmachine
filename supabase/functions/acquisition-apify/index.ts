@@ -67,7 +67,7 @@ serve(async (req) => {
         };
 
         // Map filters to HarvestAPI linkedin-profile-search input fields
-        // jobTitle goes to searchQuery (fuzzy search) — works for "CEO, CTO, Founder" etc.
+        // jobTitle goes to searchQuery (fuzzy search) — works best with Apify for "CEO, CTO, Founder" etc.
         if (filters.jobTitle) {
             input.searchQuery = filters.jobTitle;
         }
