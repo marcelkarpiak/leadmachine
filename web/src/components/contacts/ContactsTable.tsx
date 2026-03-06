@@ -73,16 +73,6 @@ export default function ContactsTable({ data }: ContactsTableProps) {
         },
         { header: "Firma", accessorKey: "company_name" as const },
         {
-            header: "Branża",
-            accessorKey: "company_industry" as const,
-            cell: (r: LeadRow) => <span className="text-text-secondary">{r.company_industry}</span>
-        },
-        {
-            header: "Wielkość firmy",
-            accessorKey: "company_size" as const,
-            cell: (r: LeadRow) => <span className="text-text-secondary">{r.company_size || "—"}</span>
-        },
-        {
             header: "E-mail",
             accessorKey: "email" as const,
             cell: (r: LeadRow) => <span className="font-mono text-[13px]">{r.email || "-"}</span>

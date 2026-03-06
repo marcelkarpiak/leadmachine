@@ -25,8 +25,6 @@ const columns = [
     { header: "Imię i nazwisko", accessorKey: "full_name" as const, cell: (r: ListLead) => <span className="font-medium text-text-primary">{r.full_name}</span> },
     { header: "Stanowisko", accessorKey: "job_title" as const, cell: (r: ListLead) => <span className="text-text-secondary">{r.job_title}</span> },
     { header: "Firma", accessorKey: "company_name" as const },
-    { header: "Branża", accessorKey: "company_industry" as const, cell: (r: ListLead) => <span className="text-text-secondary">{r.company_industry || "—"}</span> },
-    { header: "Wielkość firmy", accessorKey: "company_size" as const, cell: (r: ListLead) => <span className="text-text-secondary">{r.company_size || "—"}</span> },
     { header: "Email", accessorKey: "email" as const, cell: (r: ListLead) => <span className="text-text-secondary">{r.email || "—"}</span> },
     {
         header: "Score", accessorKey: "score" as const, cell: (r: ListLead) => {

@@ -103,6 +103,8 @@ serve(async (req) => {
         // (A) Polling Apify Status (Synchronous Wait - up to timeout limits)
         let runDetails = apifyRunData.data;
         let isTaskFinished = false;
+        let lastLoggedCount = -1;
+        const targetCount = sessionData.target_count || 0;
 
         while (!isTaskFinished) {
             // Wait 5 seconds
@@ -111,6 +113,13 @@ serve(async (req) => {
             const statusRes = await fetch(`https://api.apify.com/v2/acts/harvestapi~linkedin-profile-search/runs/${runDetails.id}?token=${apifyToken}`);
             const statusData = await statusRes.json();
             runDetails = statusData.data;
+
+            const currentCount: number = runDetails.stats?.itemCount ?? 0;
+            if (currentCount > lastLoggedCount) {
+                const target = targetCount > 0 ? `/${targetCount}` : '';
+                await log(supabaseClient, sessionId, `Apify: ${currentCount}${target} profili znalezionych...`, "working");
+                lastLoggedCount = currentCount;
+            }
 
             if (runDetails.status === "SUCCEEDED" || runDetails.status === "FAILED" || runDetails.status === "ABORTED" || runDetails.status === "TIMED-OUT") {
                 isTaskFinished = true;
@@ -129,17 +138,21 @@ serve(async (req) => {
         await log(supabaseClient, sessionId, `Zebrano ${apifyProfiles.length} surowych profili z LinkedIn.`, "success");
 
         // 6. Map Apify output to unified RawProfile format for normalization
+        // NOTE: HarvestAPI LinkedIn Profile Search does NOT return companyIndustry or companySize.
+        // currentPosition[0] has companyName but no position field.
+        // experience[0] has position (job title) and companyName.
         const profiles = apifyProfiles.map((p: any) => {
-            const currentJob = p.currentPosition?.[0] || p.experience?.[0];
+            const currentPosition = p.currentPosition?.[0];
+            const currentExperience = p.experience?.[0];
             return {
                 firstName: p.firstName || "",
                 lastName: p.lastName || "",
-                jobTitle: currentJob?.position || p.headline || "",
-                companyName: currentJob?.companyName || "",
+                jobTitle: currentExperience?.position || p.headline || "",
+                companyName: currentPosition?.companyName || currentExperience?.companyName || "",
                 linkedInUrl: p.linkedinUrl || "",
                 location: p.location?.parsed?.text || p.location?.linkedinText || "",
-                industry: currentJob?.companyIndustry || p.industryName || p.industry || "",
-                companySize: currentJob?.companySize || p.companySize || "",
+                industry: "",
+                companySize: "",
                 headline: p.headline || "",
                 about: p.about || "",
                 photoUrl: p.photo || p.profilePicture || "",
