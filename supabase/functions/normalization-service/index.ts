@@ -37,30 +37,69 @@ function cleanCompanyName(name: string): string {
         .trim();
 }
 
-async function findEmailWithHunter(firstName: string, lastName: string, companyName: string, apiKey: string): Promise<{ email: string | undefined; raw: any }> {
-    try {
-        const cleanedCompany = cleanCompanyName(companyName);
+// Single Hunter email-finder call with given params
+async function hunterEmailFinderCall(params: Record<string, string>, apiKey: string): Promise<string | undefined> {
+    const queryParams = new URLSearchParams({ ...params, api_key: apiKey, max_duration: "20" });
+    const response = await fetch(`https://api.hunter.io/v2/email-finder?${queryParams.toString()}`);
+    if (!response.ok) return undefined;
+    const data = await response.json();
+    return data?.data?.email || undefined;
+}
 
-        const queryParams = new URLSearchParams({
-            first_name: firstName,
-            last_name: lastName,
-            company: cleanedCompany,
-            api_key: apiKey
-        });
+// Resolve company name → domain using Hunter domain-search (mirrors the manual dashboard flow)
+async function hunterResolveDomain(companyName: string, apiKey: string): Promise<string | undefined> {
+    const queryParams = new URLSearchParams({ company: companyName, api_key: apiKey });
+    const response = await fetch(`https://api.hunter.io/v2/domain-search?${queryParams.toString()}`);
+    if (!response.ok) return undefined;
+    const data = await response.json();
+    return data?.data?.domain || undefined;
+}
 
-        const response = await fetch(`https://api.hunter.io/v2/email-finder?${queryParams.toString()}`);
+// Extract LinkedIn handle from full LinkedIn URL
+// e.g. "https://www.linkedin.com/in/jan-kowalski-123/" → "jan-kowalski-123"
+function extractLinkedInHandle(linkedInUrl: string): string | undefined {
+    const match = linkedInUrl.match(/linkedin\.com\/in\/([^/?#]+)/);
+    return match?.[1] || undefined;
+}
 
-        if (!response.ok) {
-            console.warn(`[HUNTER] Failed for ${firstName} ${lastName} @ ${cleanedCompany}: HTTP ${response.status}`);
-            return { email: undefined, raw: { status: response.status } };
-        }
+// NOTE ON BILLING: Email Finder charges 1 credit per API call (regardless of result).
+// Domain Search charges 1 credit only if ≥1 result is returned.
+// Strategies are ordered by accuracy; each failed attempt costs 1 credit.
+async function findEmailWithHunter(
+    firstName: string,
+    lastName: string,
+    companyName: string,
+    linkedInUrl: string,
+    apiKey: string
+): Promise<{ email: string | undefined; raw: any; strategy: string }> {
+    const cleanedCompany = cleanCompanyName(companyName);
+    const nameParams = { first_name: firstName, last_name: lastName };
 
-        const data = await response.json();
-        return { email: data?.data?.email || undefined, raw: data?.data };
-    } catch (error) {
-        console.error(`[HUNTER] Exception: ${error.message}`);
-        return { email: undefined, raw: { error: error.message } };
+    // Strategy 1: linkedin_handle — most accurate when Hunter has indexed the profile
+    // Docs: email-finder accepts linkedin_handle as company identifier (no domain/company needed)
+    const linkedInHandle = extractLinkedInHandle(linkedInUrl);
+    if (linkedInHandle) {
+        const email = await hunterEmailFinderCall({ ...nameParams, linkedin_handle: linkedInHandle }, apiKey);
+        if (email) return { email, raw: {}, strategy: 'linkedin_handle' };
+        await new Promise(r => setTimeout(r, 300));
     }
+
+    // Strategy 2: cleaned company name
+    let email = await hunterEmailFinderCall({ ...nameParams, company: cleanedCompany }, apiKey);
+    if (email) return { email, raw: {}, strategy: 'company_cleaned' };
+
+    // Strategy 3: resolve company → domain via domain-search, then use domain in email-finder
+    // Mirrors what Hunter dashboard does when showing the "suggested domain" for a company name
+    // domain-search costs 1 credit only if it returns ≥1 result
+    await new Promise(r => setTimeout(r, 300));
+    const domain = await hunterResolveDomain(cleanedCompany, apiKey);
+    if (domain) {
+        await new Promise(r => setTimeout(r, 300));
+        email = await hunterEmailFinderCall({ ...nameParams, domain }, apiKey);
+        if (email) return { email, raw: { domain }, strategy: 'domain_resolved' };
+    }
+
+    return { email: undefined, raw: {}, strategy: 'not_found' };
 }
 
 // --- Scoring ---
@@ -182,17 +221,17 @@ serve(async (req) => {
 
             // ENRICHMENT (Only if we have Hunter key and it's not a duplicate early on)
             if (!isDuplicate && hunterApiKey && profile.companyName && profile.firstName) {
-                const hunterResult = await findEmailWithHunter(profile.firstName, profile.lastName || '', profile.companyName, hunterApiKey);
+                const hunterResult = await findEmailWithHunter(profile.firstName, profile.lastName || '', profile.companyName, profile.linkedInUrl || '', hunterApiKey);
                 email = hunterResult.email;
 
-                console.log(`[HUNTER] ${profile.firstName} ${profile.lastName} @ ${profile.companyName} → ${email || 'not found'}`);
+                console.log(`[HUNTER] ${profile.firstName} ${profile.lastName} @ ${profile.companyName} → ${email || 'not found'} (strategy: ${hunterResult.strategy})`);
 
                 // Secondary deduplication after finding email:
                 if (email && existingEmails.has(email)) {
                     isDuplicate = true;
                 }
 
-                // Throttling: Wait a bit to avoid hitting 15 req/sec limit on standard Hunter accounts
+                // Base throttle between profiles (individual strategy calls already throttle internally)
                 await new Promise(r => setTimeout(r, 200));
             }
 
