@@ -67,9 +67,9 @@ serve(async (req) => {
         };
 
         // Map filters to HarvestAPI linkedin-profile-search input fields
-        // jobTitle goes to searchQuery (fuzzy search) — works best with Apify for "CEO, CTO, Founder" etc.
+        // jobTitle goes to currentJobTitles (array of strings) natively supported by Apify
         if (filters.jobTitle) {
-            input.searchQuery = filters.jobTitle;
+            input.currentJobTitles = filters.jobTitle.split(",").map((s: string) => s.trim()).filter(Boolean);
         }
         if (filters.location) {
             input.locations = filters.location.split(",").map((s: string) => s.trim()).filter(Boolean);
