@@ -53,7 +53,7 @@ serve(async (req: Request) => {
             Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
         );
 
-        await log(supabaseClient, sessionId, `Zapisywanie ${normalizedProfiles.filter(p => !p.isDuplicate).length} leadów do bazy...`, "working");
+        await log(supabaseClient, sessionId, `[Etap 3/3] Transport — zapisywanie ${normalizedProfiles.filter(p => !p.isDuplicate).length} nowych leadów do bazy...`, "working");
 
         // 1. Wyodrębnienie tylko NIE ZDUPLIKOWANYCH leadów do zapisania
         const validLeadsToInsert = normalizedProfiles.filter(p => !p.isDuplicate).map(p => ({

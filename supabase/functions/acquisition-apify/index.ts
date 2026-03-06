@@ -83,7 +83,7 @@ serve(async (req) => {
         }
 
         console.log(`[ACQ-API] Starting Apify run for session ${sessionId}`, input);
-        await log(supabaseClient, sessionId, "Łączenie z Apify API...", "working");
+        await log(supabaseClient, sessionId, `[Etap 1/3] Apify — szukanie profili LinkedIn (cel: ${sessionData.target_count || '?'})...`, "working");
 
         // 4. Start Apify Actor
         const apifyResponse = await fetch(`https://api.apify.com/v2/acts/harvestapi~linkedin-profile-search/runs?token=${apifyToken}`, {
@@ -98,24 +98,21 @@ serve(async (req) => {
             throw new Error(`Apify start failed: ${JSON.stringify(apifyRunData)}`);
         }
 
-        await log(supabaseClient, sessionId, "Apify Actor uruchomiony, oczekiwanie na wyniki...", "working");
-
-        // (A) Polling Apify Status (Synchronous Wait - up to timeout limits)
+        // (A) Polling Apify Status co 2 sekundy
         let runDetails = apifyRunData.data;
         let isTaskFinished = false;
         let lastLoggedCount = -1;
         const targetCount = sessionData.target_count || 0;
 
         while (!isTaskFinished) {
-            // Wait 5 seconds
-            await new Promise(r => setTimeout(r, 5000));
+            await new Promise(r => setTimeout(r, 2000));
 
             const statusRes = await fetch(`https://api.apify.com/v2/acts/harvestapi~linkedin-profile-search/runs/${runDetails.id}?token=${apifyToken}`);
             const statusData = await statusRes.json();
             runDetails = statusData.data;
 
             const currentCount: number = runDetails.stats?.itemCount ?? 0;
-            if (currentCount > lastLoggedCount) {
+            if (currentCount > lastLoggedCount && currentCount > 0) {
                 const target = targetCount > 0 ? `/${targetCount}` : '';
                 await log(supabaseClient, sessionId, `Apify: ${currentCount}${target} profili znalezionych...`, "working");
                 lastLoggedCount = currentCount;
@@ -135,7 +132,7 @@ serve(async (req) => {
         const apifyProfiles = await datasetRes.json();
 
         console.log(`[ACQ-API] Gathered ${apifyProfiles.length} raw profiles from Apify.`);
-        await log(supabaseClient, sessionId, `Zebrano ${apifyProfiles.length} surowych profili z LinkedIn.`, "success");
+        await log(supabaseClient, sessionId, `[Etap 1/3] Apify — zebrano ${apifyProfiles.length} profili. Przekazuję do enrichmentu...`, "success");
 
         // 6. Map Apify output to unified RawProfile format for normalization
         // NOTE: HarvestAPI LinkedIn Profile Search does NOT return companyIndustry or companySize.

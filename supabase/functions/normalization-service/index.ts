@@ -291,20 +291,17 @@ serve(async (req) => {
         const weightsCount = Object.keys(weights).length;
 
         if (!hunterApiKey) {
-            await log(supabaseClient, sessionId, "Brak HUNTER_API_KEY w api_keys — pomijam enrichment emaili.", "warning");
+            await log(supabaseClient, sessionId, "[Etap 2/3] Hunter.io — brak klucza API, pomijam enrichment emaili.", "warning");
         } else {
-            await log(supabaseClient, sessionId, `Hunter.io: klucz znaleziony. ${profilesWithCompany}/${profiles.length} profili ma companyName.`, "info");
+            await log(supabaseClient, sessionId, `[Etap 2/3] Hunter.io — szukanie emaili dla ${profilesWithCompany} profili...`, "working");
         }
 
         if (weightsCount === 0) {
-            await log(supabaseClient, sessionId, "Tabela scoring_weights jest pusta — scoring będzie zerowy.", "warning");
-        } else {
-            await log(supabaseClient, sessionId, `Scoring: załadowano ${weightsCount} wag.`, "info");
+            await log(supabaseClient, sessionId, "Scoring: brak wag w tabeli, scoring będzie zerowy.", "warning");
         }
 
         // 4. Process each profile (Enrich, Score, Dedupe)
         console.log(`[NORM-API] Processing ${profiles.length} profiles...`);
-        await log(supabaseClient, sessionId, `Enrichment Hunter.io dla ${profilesWithCompany} profili...`, "working");
 
         for (const [index, profile] of profiles.entries()) {
             let isDuplicate = existingUrls.has(profile.linkedInUrl);
