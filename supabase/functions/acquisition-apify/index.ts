@@ -67,9 +67,13 @@ serve(async (req) => {
         };
 
         // Map filters to HarvestAPI linkedin-profile-search input fields
-        // jobTitle goes to currentJobTitles (array of strings) natively supported by Apify
+        // jobTitle goes to searchQuery (Boolean OR string) — works best with Apify for "CEO, CTO, Founder" etc.
         if (filters.jobTitle) {
-            input.currentJobTitles = filters.jobTitle.split(",").map((s: string) => s.trim()).filter(Boolean);
+            // Convert "CEO, Head of Sales" -> '"CEO" OR "Head of Sales"' for LinkedIn boolean search
+            input.searchQuery = filters.jobTitle
+                .split(",")
+                .map((s: string) => `"${s.trim()}"`)
+                .join(" OR ");
         }
         if (filters.location) {
             input.locations = filters.location.split(",").map((s: string) => s.trim()).filter(Boolean);
