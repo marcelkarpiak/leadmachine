@@ -63,7 +63,6 @@ export const LINKEDIN_INDUSTRIES: IndustryOption[] = [
 
     // Transportation & Logistics
     { id: "36", label: "Transportation, Logistics, and Warehousing", group: "Logistics" },
-    { id: "2287", label: "Freight and Logistics Services", group: "Logistics" },
 
     // Education
     { id: "1999", label: "Education", group: "Education" },
